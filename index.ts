@@ -7,12 +7,13 @@ const db = createClient({
 });
 
 const SUBREDDIT_WEIGHTS = {
-    memes: 1.1,
-    dankmemes: 1.2,
+    memes: 1.2,
+    dankmemes: 1.3,
     wholesomememes: 1.0,
-    desimemes: 1.5,
-    indiameme: 1.5,
-    funny: 0.9,
+    me_irl: 1.2,
+    MemeEconomy: 1.1,
+    AdviceAnimals: 1.0,
+    funny: 0.8,
 } as const;
 
 const CONFIG = {
@@ -31,7 +32,7 @@ const CONFIG = {
     AGE_PENALTY_DIVISOR: 8,
     MAX_AGE_PENALTY: 25,
     MAX_ENGAGEMENT_BONUS: 30,
-    CLEANUP_DAYS: 30,
+    CLEANUP_DAYS: 365,
     ROTATION_ENABLED: true,
     ROTATION_LOOKBACK_POSTS: 3,
 } as const;
