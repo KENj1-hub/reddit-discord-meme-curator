@@ -27,7 +27,7 @@ const CONFIG = {
     WEBHOOK_URL: process.env.DISCORD_WEB_URL ?? "",
     CRON_SCHEDULE: "0 * * * *",
     REQUEST_TIMEOUT_MS: 10_000,
-    MAX_RETRIES: 2,
+    MAX_RETRIES: 3,
     MAX_TOP_CANDIDATES: 5,
     AGE_PENALTY_DIVISOR: 8,
     MAX_AGE_PENALTY: 25,
@@ -193,13 +193,20 @@ async function safeFetch(
 
         return res;
     } catch (err) {
-        if (attempt < CONFIG.MAX_RETRIES) {
-            console.warn(`⚠️  Retrying fetch (attempt ${attempt + 1})...`);
-            await new Promise((r) => setTimeout(r, 1000 * (attempt + 1))); // Exponential backoff
-            return safeFetch(url, options, attempt + 1);
-        }
-        throw err;
-    } finally {
+    if (attempt < CONFIG.MAX_RETRIES) {
+        const delayMs = 5000 * (attempt + 1);
+
+        console.warn(
+            `⚠️ Fetch failed. Retrying in ${delayMs / 1000}s (attempt ${attempt + 1}/${CONFIG.MAX_RETRIES})...`,
+        );
+
+        await new Promise((r) => setTimeout(r, delayMs));
+
+        return safeFetch(url, options, attempt + 1);
+    }
+
+    throw err;
+          } finally {
         clearTimeout(timeout);
     }
 }
