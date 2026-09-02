@@ -1,0 +1,31 @@
+name: Daily Meme
+
+on:
+  schedule:
+    - cron: "0 12 * * *"
+      timezone: "Europe/Berlin"
+
+  workflow_dispatch:
+
+jobs:
+  post-meme:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Repository laden
+        uses: actions/checkout@v4
+
+      - name: Bun installieren
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Abhängigkeiten installieren
+        run: bun install
+
+      - name: Meme posten
+        run: bun run index.ts
+        env:
+          DB_URL: ${{ secrets.DB_URL }}
+          DB_TOKEN: ${{ secrets.DB_TOKEN }}
+          DISCORD_WEB_URL: ${{ secrets.DISCORD_WEB_URL }}
