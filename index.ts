@@ -25,7 +25,6 @@ const CONFIG = {
     MAX_TITLE_LENGTH: 200,
     MIN_UPVOTE_RATIO: 0.7,
     WEBHOOK_URL: process.env.DISCORD_WEB_URL ?? "",
-    CRON_SCHEDULE: "0 * * * *",
     REQUEST_TIMEOUT_MS: 10_000,
     MAX_RETRIES: 3,
     MAX_TOP_CANDIDATES: 5,
@@ -599,7 +598,6 @@ process.on("SIGINT", async () => {
     try {
         await initDb();
         console.log("🤖 Meme bot running...");
-        console.log(`⏰ Schedule: ${CONFIG.CRON_SCHEDULE} (Asia/Kolkata)`);
         console.log(`📡 Monitoring: ${CONFIG.SUBREDDITS.length} subreddits`);
         console.log(
             `🔄 Rotation: ${CONFIG.ROTATION_ENABLED ? "ENABLED" : "DISABLED"} (lookback: ${CONFIG.ROTATION_LOOKBACK_POSTS} posts)\n`,
