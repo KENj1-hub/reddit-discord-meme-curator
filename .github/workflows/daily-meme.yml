@@ -2,7 +2,7 @@ name: Daily Meme
 
 on:
   schedule:
-    - cron: "0 12 * * *"
+    - cron: "0 */6 * * *"
       timezone: "Europe/Berlin"
 
   workflow_dispatch:
