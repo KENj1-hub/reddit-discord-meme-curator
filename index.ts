@@ -600,17 +600,6 @@ process.on("SIGINT", async () => {
 
         // Initial run immediately on startup
         await run();
-
-        // Then schedule
-        const job = new CronJob(
-            CONFIG.CRON_SCHEDULE,
-            run,
-            null,
-            true,
-            "Asia/Kolkata",
-        );
-        console.log("⏰ Cron job scheduled");
-        job.start();
     } catch (err) {
         console.error("💥 Failed to start bot:", err);
         process.exit(1);
