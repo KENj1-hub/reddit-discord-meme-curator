@@ -204,42 +204,75 @@ async function safeFetch(
     }
 }
 
+type MemeApiPost = {
+    postLink: string;
+    subreddit: string;
+    title: string;
+    url: string;
+    nsfw: boolean;
+    spoiler: boolean;
+    author: string;
+    ups: number;
+    preview?: string[];
+};
+
+type MemeApiResponse = {
+    count: number;
+    memes: MemeApiPost[];
+};
+
 async function fetchPosts(): Promise<RedditPost[]> {
-    const urls = CONFIG.SUBREDDITS.map(
-        (s) =>
-            `https://api.reddit.com/r/${s}/top.json?t=day&limit=${CONFIG.FETCH_LIMIT}`,
-    );
-
-    const responses = await Promise.allSettled(urls.map((url) => safeFetch(url)));
-
     const posts: RedditPost[] = [];
-    const failedSubreddits: string[] = [];
 
-    for (const [index, result] of responses.entries()) {
-        const subreddit = CONFIG.SUBREDDITS[index];
+    const requests = CONFIG.SUBREDDITS.map(async (subreddit) => {
+        try {
+            const url = `https://meme-api.com/gimme/${subreddit}/10`;
+            const response = await safeFetch(url);
 
-        if (!subreddit) continue;
+            const json = (await response.json()) as MemeApiResponse;
 
-        if (result.status === "rejected") {
-            failedSubreddits.push(subreddit);
-            console.error(`❌ Failed to fetch r/${subreddit}`);
-            continue;
+            if (!json.memes || !Array.isArray(json.memes)) {
+                console.warn(`⚠️ No memes returned for r/${subreddit}`);
+                return;
+            }
+
+            for (const meme of json.memes) {
+                const id =
+                    meme.postLink.split("/").filter(Boolean).pop() ??
+                    crypto.randomUUID();
+
+                posts.push({
+                    id,
+                    title: meme.title,
+                    permalink: new URL(meme.postLink).pathname,
+                    ups: meme.ups ?? 0,
+                    num_comments: 0,
+                    over_18: meme.nsfw ?? false,
+                    post_hint: "image",
+                    url: meme.url,
+                    url_overridden_by_dest: meme.url,
+                    is_video: false,
+                    created_utc: Math.floor(Date.now() / 1000),
+                    upvote_ratio: 1,
+                    author: meme.author ?? "unknown",
+                    subreddit: meme.subreddit ?? subreddit,
+                });
+            }
+
+            console.log(
+                `✅ Fetched ${json.memes.length} memes from r/${subreddit}`,
+            );
+        } catch (err) {
+            console.error(`❌ Failed to fetch r/${subreddit}:`, err);
         }
+    });
 
-        const response = result.value;
-        const json = (await response.json()) as RedditListing;
+    await Promise.allSettled(requests);
 
-        posts.push(...json.data.children.map((c) => c.data));
-    }
+    console.log(`📥 Fetched ${posts.length} memes via Meme API`);
 
-    if (failedSubreddits.length > 0) {
-        console.warn(`⚠️  Failed subreddits: ${failedSubreddits.join(", ")}`);
-    }
-
-    console.log(`📥 Fetched ${posts.length} posts from Reddit`);
     return posts;
 }
-
 function isValidImage(post: RedditPost, postedIds: Set<string>): boolean {
     // Basic filters
     if (post.over_18) return false;
