@@ -471,7 +471,7 @@ async function sendToDiscord(post: RedditPost) {
                 title,
                 url: redditUrl,
                 image: { url: imageUrl },
-                color: 0xff4500,
+                color: 0x57F287,
                 footer: {
                     text: `r/${post.subreddit} • 👍 ${formatNumber(post.ups)} | 💬 ${formatNumber(post.num_comments)} | 📊 ${Math.round(post.upvote_ratio * 100)}%`,
                 },
