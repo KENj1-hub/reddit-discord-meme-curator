@@ -1,0 +1,28 @@
+name: Keep Alive
+
+on:
+  schedule:
+    # Läuft jeden Sonntag um 0:00 Uhr
+    - cron: '0 0 * * 0'
+  workflow_dispatch: # Erlaubt es, den Job auch manuell zu starten
+
+jobs:
+  keep-alive:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Dummy-Änderung in Datei schreiben
+        run: |
+          date > ping.txt
+
+      - name: Automatisch committen und pushen
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add ping.txt
+          git commit -m "Keep alive: Automatische Aktivierung" || exit 0
+          git push
